@@ -5,11 +5,9 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/css/bootstrap.min.css"
         integrity="sha384-VCmXjywReHh4PwowAiWNagnWcLhlEJLA5buUprzK8rxFgeH0kww/aWY76TfkUoSX" crossorigin="anonymous">
-
     <link rel="stylesheet" type="text/css" href="assets/style.css">
     <!-- Font Awesome -->
     <script src="https://use.fontawesome.com/c0d1bc6122.js"></script>
@@ -18,19 +16,22 @@
 </head>
 
 <body>
-
+    <button id="signout_button" class="btn btn-link" style="display: none;">Sign Out</button>
     <div class="row justify-content-center mt-5 mb-5 mr-5 ml-5">
         <img src="assets/logo-extrategia.png" class="img-fluid" alt="Responsive image">
     </div>
     <div class="row justify-content-center mt-8 mr-5 ml-5">
+        <button id="authorize_button" class="btn btn-outline-info" style="display: none;">Sign In</button>
+    </div>
+    <div class="row justify-content-center mt-8 mr-5 ml-5" id="search_bar">
         <div class="d-flex justify-content-center h-100">
             <div class="searchbar">
-                <input class="search_input" type="text" name="" placeholder="Search...">
+                <input class="search_input" type="text" placeholder="Buscar..." onkeypress="return buscar(event)">
                 <a href="#" class="search_icon"><i class="fa fa-search"></i></a>
             </div>
         </div>
     </div>
-    <!-- Optional JavaScript -->
+    <div id="content"></div>
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
@@ -41,6 +42,11 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/js/bootstrap.min.js"
         integrity="sha384-XEerZL0cuoUbHE4nZReLT7nx9gQrQreJekYhJD9WNWhH8nEW+0c5qq7aIo2Wl30J"
         crossorigin="anonymous"></script>
+    <!-- Drive API Scripts -->
+    <script src="assets/scripts.js" type="text/javascript"></script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad()"
+        onreadystatechange="if (this.readyState === 'complete') this.onload()">
+        </script>
 </body>
 
 </html>
