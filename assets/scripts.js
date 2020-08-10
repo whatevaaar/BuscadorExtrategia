@@ -13,7 +13,9 @@ var SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly';
 var authorizeButton = document.getElementById('authorize_button');
 var signoutButton = document.getElementById('signout_button');
 var barraBusquda = document.getElementById('search_bar');
-
+var divCards = document.getElementById("content");
+var listaDeIdDeCarpetasPadre = [];
+var queryPadres = "";
 /**
  *  On load, called to load the auth2 library and API client library.
  */
@@ -50,11 +52,12 @@ function initClient() {
  */
 function updateSigninStatus(isSignedIn) {
     if (isSignedIn) {
+        crearListaDePadres();
         authorizeButton.style.display = 'none';
         signoutButton.style.display = 'block';
-        barraBusquda.style.display = 'block'
+        barraBusquda.style.display = 'block';
     } else {
-        barraBusquda.style.display = 'none'
+        barraBusquda.style.display = 'none';
         authorizeButton.style.display = 'block';
         signoutButton.style.display = 'none';
     }
@@ -75,40 +78,90 @@ function handleSignoutClick(event) {
 }
 
 /**
- * Append a pre element to the body containing the given message
- * as its text node. Used to display the results of the API call.
- *
- * @param {string} message Text to be placed in pre element.
+ * Crea cards con los resultados encontrados
  */
-function appendPre(message) {
-    var pre = document.getElementById('content');
-    var textContent = document.createTextNode(message + '\n');
-    pre.appendChild(textContent);
+function crearCard(file) {
+    let nombre = file.name.slice(0, file.name.indexOf('-')).replaceAll('_', ' ');
+    console.log(file.name)
+    let card = document.createElement('div');
+    card.className = 'card mt-3 ml-5 mr-5';
+
+    let cardHeader = document.createElement('h5');
+    cardHeader.className = 'card-header';
+    cardHeader.innerText = nombre;
+
+    let cardBody = document.createElement('div');
+    cardBody.className = 'card-body';
+
+    let title = document.createElement('h5');
+    title.innerText = file.name;
+    title.className = 'card-title';
+
+    let enlace = document.createElement('a');
+    enlace.className = "btn btn-outline-success";
+    enlace.href = "http://drive.google.com/a/extrategia.com.mx/uc?id=" + file.id;
+    enlace.innerText = 'Descargar';
+
+    card.appendChild(cardHeader);
+    card.appendChild(cardBody);
+    cardBody.appendChild(title);
+    cardBody.appendChild(enlace);
+    divCards.appendChild(card);
+}
+
+function crearListaDePadres() {
+    gapi.client.drive.files.list({
+        'q': "'0AA9UZB_ARqnhUk9PVA' in parents and mimeType = 'application/vnd.google-apps.folder'",
+        'corpora': "allDrives",
+        'includeItemsFromAllDrives': true,
+        'supportsAllDrives': true,
+        'fields': "nextPageToken, files(id, name)"
+    }).then(function (response) {
+        var files = response.result.files;
+        if (files && files.length > 0) {
+            files.forEach(file => {
+                listaDeIdDeCarpetasPadre.push(file.id);
+            });
+        }
+        listaDeIdDeCarpetasPadre.forEach(id => {
+            queryPadres = queryPadres + "'" + id + "' in parents or ";
+        });
+        queryPadres = queryPadres.slice(0, -4);
+    });
 }
 
 /**
  * Print files.
  */
 function listFiles() {
+    divCards.innerHTML = '';
+    let num = 0;
+    let termino = document.getElementById('input_busqueda').value.toUpperCase();
+    console.log(listaDeIdDeCarpetasPadre);
+    let query = ["mimeType != 'application/vnd.google-apps.folder'",
+        "and",
+        "trashed = false",
+        "and",
+        "(name contains '" + termino + "' or fullText contains '" + termino + "')",
+        "and",
+        "(" + queryPadres + ")",
+        "and",
+        "(mimeType = 'application/vnd.ms-powerpoint' or mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation')",
+    ].join(' ');
+    console.log(query);
     gapi.client.drive.files.list({
-        'q': "mimeType = 'application/vnd.google-apps.folder' and '0AA9UZB_ARqnhUk9PVA' in parents",
-        'corpora': "allDrives",
-        'mimeType': 'application/vnd.google-apps.folder',
+        'q': query,
+        'corpora': 'allDrives',
         'includeItemsFromAllDrives': true,
         'supportsAllDrives': true,
-        'fields': "nextPageToken, files(id, name)"
+        'fields': "nextPageToken, files(id, name, webContentLink)"
     }).then(function (response) {
-        appendPre('Files:');
         var files = response.result.files;
-        if (files && files.length > 0) {
-            for (var i = 0; i < files.length; i++) {
-                var file = files[i];
-                appendPre(file.name + ' (' + file.id + ')');
-            }
-        } else {
-            appendPre('No files found.');
-        }
+        if (files && files.length > 0)
+            files.forEach(file => crearCard(file));
+        else $('.toast').toast('show');
     });
+
 }
 
 function buscar(event) {

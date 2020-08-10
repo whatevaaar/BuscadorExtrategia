@@ -22,16 +22,11 @@ body {
     transition: width 0.4s linear;
 }
 
-.searchbar:hover>.search_input {
+.search_input_hovered {
     padding: 0 10px;
     width: 80vw;
     caret-color: red;
     transition: width 0.4s linear;
-}
-
-.searchbar:hover>.search_icon {
-    background: white;
-    color: #e74c3c;
 }
 
 .search_icon {
@@ -42,12 +37,18 @@ body {
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    color: white;
+    color: #e26c06;
     text-decoration: none;
 }
 
 #signout_button {
     position: absolute;
-    bottom: 0;
+    top: 0;
     right: 0;
+}
+
+.toast{
+    position: absolute;
+    top: 0;
+    left: 0;
 }
