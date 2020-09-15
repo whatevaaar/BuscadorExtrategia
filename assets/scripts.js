@@ -12,7 +12,6 @@ var firebaseConfig = {
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-firebase.analytics();
 
 // Client ID and API key from the Developer Console
 var CLIENT_ID = '<YOUR_CLIENT_ID>';
