@@ -37,7 +37,12 @@
 
     <!-- Resultados -->
     <div id="content" class="mt-5"></div>
-
+    <div class="row justify-content-center mt-5" id="paginacion" hidden>
+        <nav aria-label="Page navigation example" class="paginacion">
+            <ul class="pagination" id="ul-paginacion">
+            </ul>
+        </nav>
+    </div>
     <!-- Toast -->
     <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
         <div class="toast-header">
@@ -49,7 +54,13 @@
         </div>
         <div class="toast-body">No se encontraron resultados, intenta con otra palabra</div>
     </div>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
 
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"

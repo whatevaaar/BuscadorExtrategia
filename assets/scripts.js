@@ -1,21 +1,43 @@
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+var firebaseConfig = {
+    apiKey: "AIzaSyDvAaIy2lQoHU3_fddRYa3h5c8kygN0GHM",
+    authDomain: "buscadorextrateg-1596755329667.firebaseapp.com",
+    databaseURL: "https://buscadorextrateg-1596755329667.firebaseio.com",
+    projectId: "buscadorextrateg-1596755329667",
+    storageBucket: "buscadorextrateg-1596755329667.appspot.com",
+    messagingSenderId: "821365588486",
+    appId: "1:821365588486:web:a8b39d97927f2d85603987",
+    measurementId: "G-QGSGGDG9YW"
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+firebase.analytics();
 
 // Client ID and API key from the Developer Console
 var CLIENT_ID = '<YOUR_CLIENT_ID>';
 var API_KEY = '<YOUR_API_KEY>';
 
 // Array of API discovery doc URLs for APIs used by the quickstart
-var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
+const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
 
+
+var NUMERO_DE_RESULTADOS = 0;
 // Authorization scopes required by the API; multiple scopes can be
 // included, separated by spaces.
-var SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly';
+const SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly';
 
-var authorizeButton = document.getElementById('authorize_button');
-var signoutButton = document.getElementById('signout_button');
-var barraBusquda = document.getElementById('search_bar');
-var divCards = document.getElementById("content");
-var listaDeIdDeCarpetasPadre = [];
+const authorizeButton = document.getElementById('authorize_button');
+const signoutButton = document.getElementById('signout_button');
+const barraBusqueda = document.getElementById('search_bar');
+const divCards = document.getElementById("content");
+const divPaginacion = document.getElementById("paginacion");
+const listaDeIdDeCarpetasPadre = [];
+var listaDeReviews = [];
 var queryPadres = "";
+
+conseguirReviews();
+const NUMERO_MAXIMO_RESULTADOS_POR_PAG = 10;
 /**
  *  On load, called to load the auth2 library and API client library.
  */
@@ -55,9 +77,9 @@ function updateSigninStatus(isSignedIn) {
         crearListaDePadres();
         authorizeButton.style.display = 'none';
         signoutButton.style.display = 'block';
-        barraBusquda.style.display = 'block';
+        barraBusqueda.style.display = 'block';
     } else {
-        barraBusquda.style.display = 'none';
+        barraBusqueda.style.display = 'none';
         authorizeButton.style.display = 'block';
         signoutButton.style.display = 'none';
     }
@@ -80,11 +102,14 @@ function handleSignoutClick(event) {
 /**
  * Crea cards con los resultados encontrados
  */
-function crearCard(file) {
+function crearCard(file, index) {
     let nombre = file.name.slice(0, file.name.indexOf('-')).replaceAll('_', ' ');
-    console.log(file.name)
+    let nombreTemp = nombre.replaceAll(" ", "_").replaceAll(".", "");
+    let rating = encontrarRating(nombreTemp);
     let card = document.createElement('div');
     card.className = 'card mt-3 ml-5 mr-5';
+    card.id = 'resultado-' + index;
+    card.dataset.sort = rating;
 
     let cardHeader = document.createElement('h5');
     cardHeader.className = 'card-header';
@@ -97,18 +122,98 @@ function crearCard(file) {
     title.innerText = file.name;
     title.className = 'card-title';
 
+    let divRow = document.createElement('div');
+    divRow.className = 'row justify-content-around';
+
+    let colBoton = document.createElement('div');
+    colBoton.className = 'col';
+
+    let colRating = document.createElement('div');
+    colRating.className = 'col';
+    for (let i = 0; i < 5; i++) {
+        let estrella = document.createElement('span');
+        estrella.className = rating > i ? 'fa fa-star checked' : 'fa fa-star';
+        estrella.id = "rating-" + nombreTemp + i;
+        estrella.onclick = function () {
+            listenerRating(i, nombreTemp);
+            escribirRating(i, nombreTemp);
+        };
+        colRating.appendChild(estrella);
+    }
+
+
     let enlace = document.createElement('a');
     enlace.className = "btn btn-outline-success";
     enlace.href = "http://drive.google.com/a/extrategia.com.mx/uc?id=" + file.id;
     enlace.innerText = 'Descargar';
-
+    divRow.appendChild(colBoton);
+    divRow.appendChild(colRating);
+    colBoton.appendChild(enlace);
     card.appendChild(cardHeader);
     card.appendChild(cardBody);
     cardBody.appendChild(title);
-    cardBody.appendChild(enlace);
+    cardBody.appendChild(divRow);
     divCards.appendChild(card);
 }
 
+function listenerRating(index, nombre) {
+    for (let j = 0; j < 5; j++) {
+        if (j <= index)
+            $('#rating-' + nombre + j).addClass("checked");
+        else
+            $('#rating-' + nombre + j).removeClass("checked");
+    }
+}
+
+function encontrarRating(nombre) {
+    let rating = 0;
+    let numRatings = encontrarNumRatings(nombre);
+    listaDeReviews.forEach((element) => {
+        if (element.nombre.trim() === nombre.trim()){
+            rating = element.rating;
+            return rating / numRatings;
+        }
+    });
+    return rating / numRatings;
+}
+
+function encontrarNumRatings(nombre) {
+    let num = 0
+    listaDeReviews.forEach((element) => {
+        if (element.nombre == nombre)
+            num = element.numRatings;
+            return num;
+    });
+    return num;
+}
+function conseguirReviews() {
+    var query = firebase.database().ref("ratings/");
+    query.on("value", function (snapshot) {
+        if (snapshot.empty)
+            listaDeReviews = [];
+        listaTemp = [];
+        snapshot.forEach(function (childSnapshot) {
+            let childData = childSnapshot.val();
+            console.log(childData)
+            listaTemp.push({ nombre: childSnapshot.key, rating: childData.rating, numRatings: childData.numRatings })
+        });
+        listaDeReviews = listaTemp;
+    }, function (error) {
+        console.error(error);
+    });
+}
+function escribirRating(index, nombre) {
+    let numViejo = encontrarNumRatings(nombre);
+    let ratingViejo = encontrarRating(nombre) * numViejo;
+    firebase.database().ref('ratings/' + nombre).set({
+        nombre: nombre,
+        rating: index + 1 + ratingViejo,
+        numRatings: encontrarNumRatings(nombre) + 1,
+    }, function (error) {
+        if (error)
+            console.log(error);
+    });
+}
 function crearListaDePadres() {
     gapi.client.drive.files.list({
         'q': "'0AA9UZB_ARqnhUk9PVA' in parents and mimeType = 'application/vnd.google-apps.folder'",
@@ -135,9 +240,7 @@ function crearListaDePadres() {
  */
 function listFiles() {
     divCards.innerHTML = '';
-    let num = 0;
     let termino = document.getElementById('input_busqueda').value.toUpperCase();
-    console.log(listaDeIdDeCarpetasPadre);
     let query = ["mimeType != 'application/vnd.google-apps.folder'",
         "and",
         "trashed = false",
@@ -148,7 +251,6 @@ function listFiles() {
         "and",
         "(mimeType = 'application/vnd.ms-powerpoint' or mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation')",
     ].join(' ');
-    console.log(query);
     gapi.client.drive.files.list({
         'q': query,
         'corpora': 'allDrives',
@@ -157,11 +259,67 @@ function listFiles() {
         'fields': "nextPageToken, files(id, name, webContentLink)"
     }).then(function (response) {
         var files = response.result.files;
-        if (files && files.length > 0)
-            files.forEach(file => crearCard(file));
+        if (files && files.length > 0) {
+            NUMERO_DE_RESULTADOS = files.length;
+            files.forEach(function (file, i) {
+                crearCard(file, i);
+            });
+            if (files.length > 10)
+                crearPaginacion();
+            ordenarLista();
+        }
         else $('.toast').toast('show');
     });
 
+}
+
+function ordenarLista() {
+    var result = $('.card').sort(function (a, b) {
+
+        var contentA = parseInt($(a).data('sort'));
+        var contentB = parseInt($(b).data('sort'));
+        return (contentA > contentB) ? -1 : (contentA < contentB) ? 1 : 0;
+    });
+
+    $('#content').html(result);
+}
+
+function crearPaginacion() {
+    divPaginacion.hidden = false;
+    for (let index = 0; index < NUMERO_DE_RESULTADOS; index++) {
+        document.getElementById("resultado-" + index).hidden = index > 10 ? true : false;
+        if (index % NUMERO_MAXIMO_RESULTADOS_POR_PAG == 0 && index > 0) {
+            crearElementoDePaginacion(index);
+            crearOnClickPaginacion(index);
+        }
+    }
+
+}
+
+function crearElementoDePaginacion(index) {
+    let elemento = document.createElement('li');
+    elemento.className = 'page-item';
+    elemento.id = 'paginacion-' + index;
+
+    let enlace = document.createElement('a');
+    enlace.className = "page-link";
+    enlace.href = "#";
+    enlace.innerText = index.toString().slice(0, -1);
+    elemento.appendChild(enlace);
+    document.getElementById("ul-paginacion").appendChild(elemento);
+}
+
+function crearOnClickPaginacion(index) {
+    $('#paginacion-' + index).click(function () {
+        for (let i = 0; i < NUMERO_DE_RESULTADOS; i++) {
+            if (i != index)
+                $('#paginacion-' + i).removeClass("active");
+            else
+                $('#paginacion-' + i).addClass(" active");
+            document.getElementById("resultado-" + i).hidden = (i > index || i < index - 9) ? true : false;
+        }
+        return false;
+    });
 }
 
 function buscar(event) {
