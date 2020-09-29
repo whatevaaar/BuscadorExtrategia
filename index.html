@@ -19,6 +19,27 @@
     <div class="mb-3">
         <button id="signout_button" class="btn btn-link" style="display: none;">Sign Out</button>
     </div>
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+        </button>
+        <div id="dropdown-carrito" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Clave</th>
+                        <th scope="col">Precio</th>
+                        <th scope="col">X</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-carrito">
+                </tbody>
+            </table>
+            <button class="btn btn-outline-success">Generar PDF</button>
+        </div>
+    </div>
     <div class="row justify-content-center mt-5 mb-5 mr-5 ml-5">
         <img src="assets/logo-extrategia.png" class="img-fluid" alt="Responsive image">
     </div>
@@ -44,16 +65,6 @@
         </nav>
     </div>
     <!-- Toast -->
-    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
-        <div class="toast-header">
-            <img src="..." class="rounded mr-2" alt="...">
-            <strong class="mr-auto">Sin resultados</strong>
-            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div class="toast-body">No se encontraron resultados, intenta con otra palabra</div>
-    </div>
     <!-- The core Firebase JS SDK is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
 

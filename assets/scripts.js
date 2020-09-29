@@ -31,6 +31,8 @@ const signoutButton = document.getElementById('signout_button');
 const barraBusqueda = document.getElementById('search_bar');
 const divCards = document.getElementById("content");
 const divPaginacion = document.getElementById("paginacion");
+const tablaCarrito = document.getElementById("tabla-carrito");
+
 const listaDeIdDeCarpetasPadre = [];
 var listaDeReviews = [];
 var queryPadres = "";
@@ -105,6 +107,8 @@ function crearCard(file, index) {
     let nombre = file.name.slice(0, file.name.indexOf('-')).replaceAll('_', ' ');
     let nombreTemp = nombre.replaceAll(" ", "_").replaceAll(".", "");
     let rating = encontrarRating(nombreTemp);
+    let key = file.name.split('-')[2];
+    let costo = switchPrecios(key);
     let card = document.createElement('div');
     card.className = 'card mt-3 ml-5 mr-5';
     card.id = 'resultado-' + index;
@@ -112,7 +116,7 @@ function crearCard(file, index) {
 
     let cardHeader = document.createElement('h5');
     cardHeader.className = 'card-header';
-    cardHeader.innerText = nombre;
+    cardHeader.innerHTML = nombre + "  <span class=\"badge badge-secondary\">" + key + "</span>";
 
     let cardBody = document.createElement('div');
     cardBody.className = 'card-body';
@@ -127,6 +131,16 @@ function crearCard(file, index) {
     let colBoton = document.createElement('div');
     colBoton.className = 'col';
 
+    let colAgregarCarrito = document.createElement('div');
+    colAgregarCarrito.className = 'col';
+    let botonAgregar = document.createElement('button');
+    botonAgregar.onclick = function () {
+        agregarAlCarrito(nombreTemp, costo, key);
+    };
+    botonAgregar.innerText = "Agregar al carrito";
+    botonAgregar.classList.add("btn");
+    botonAgregar.classList.add("btn-outline-info");
+    colAgregarCarrito.appendChild(botonAgregar);
     let colRating = document.createElement('div');
     colRating.className = 'col';
     for (let i = 0; i < 5; i++) {
@@ -147,6 +161,7 @@ function crearCard(file, index) {
     enlace.innerText = 'Descargar';
     divRow.appendChild(colBoton);
     divRow.appendChild(colRating);
+    divRow.appendChild(colAgregarCarrito);
     colBoton.appendChild(enlace);
     card.appendChild(cardHeader);
     card.appendChild(cardBody);
@@ -168,7 +183,7 @@ function encontrarRating(nombre) {
     let rating = 0;
     let numRatings = encontrarNumRatings(nombre);
     listaDeReviews.forEach((element) => {
-        if (element.nombre.trim() === nombre.trim()){
+        if (element.nombre.trim() === nombre.trim()) {
             rating = element.rating;
             return rating / numRatings;
         }
@@ -181,7 +196,7 @@ function encontrarNumRatings(nombre) {
     listaDeReviews.forEach((element) => {
         if (element.nombre == nombre)
             num = element.numRatings;
-            return num;
+        return num;
     });
     return num;
 }
@@ -274,7 +289,6 @@ function listFiles() {
 
 function ordenarLista() {
     var result = $('.card').sort(function (a, b) {
-
         var contentA = parseInt($(a).data('sort'));
         var contentB = parseInt($(b).data('sort'));
         return (contentA > contentB) ? -1 : (contentA < contentB) ? 1 : 0;
@@ -328,3 +342,70 @@ function buscar(event) {
     }
     return true;
 };
+
+function switchPrecios(key) {
+    switch (key) {
+        case "PR": return 120_000;
+        case "LAN": return 120_000;
+        case "BMI": return 120_000;
+        case "MKD": return 110_000;
+        case "CON": return 100_000;
+        case "EST": return 120_000;
+        case "CRI": return 180_000;
+        case "VID": return 120_000;
+        case "MTR": return 180_000;
+        case "CTR": return 180_000;
+        case "RES": return 85_000;
+        case "DED": return 120_000;
+        case "IMP": return 120_000;
+        case "SCN": return 35_000;
+        case "APU": return 120_000;
+        case "MAN": return 200_000;
+        case "PTR": return 120_000;
+        case "COV": return 120_000;
+        case "CPE": return 120_000;
+        case "RRE": return 120_000;
+        case "ARQ": return 120_000;
+        case "BRA": return 120_000;
+        case "VID": return 120_000;
+        case "FOT": return 120_000;
+        case "BCH": return 120_000;
+        case "EST": return 120_000;
+        case "INT": return 120_000;
+        case "EVE": return 120_000;
+        case "WEB": return 120_000;
+        case "APP": return 120_000;
+        case "INF": return 120_000;
+        case "VEN": return 120_000;
+        case "TAL": return 120_000;
+        default: return 0;
+    }
+}
+
+function agregarAlCarrito(nombre, costo, key) {
+    let row = document.createElement('tr');
+    row.id = "row-" + nombre;
+    let columnaNombre =document.createElement('td');
+    let columnaEnlace =document.createElement('td');
+    let columnaClave =document.createElement('td');
+    let columnaPrecio =document.createElement('td');
+    let enlace = document.createElement('a');
+    enlace.href = "#";
+    enlace.onclick = function() {
+        eliminarDelCarrito(nombre);
+    };
+    enlace.innerHTML = "<i class=\"fa fa-window-close\"></i>";
+    columnaEnlace.appendChild(enlace);
+    columnaNombre.innerText = nombre;
+    columnaClave.innerText = key;
+    columnaPrecio.innerText = costo;
+    row.appendChild(columnaNombre)
+    row.appendChild(columnaClave)
+    row.appendChild(columnaPrecio)
+    row.appendChild(columnaEnlace)
+    tablaCarrito.appendChild(row);
+}
+
+function eliminarDelCarrito(nombre){
+    document.getElementById("row-"+ nombre).remove();
+}

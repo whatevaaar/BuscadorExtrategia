@@ -47,12 +47,33 @@ body {
     right: 0;
 }
 
-.toast{
+.toast {
     position: absolute;
     top: 0;
     left: 0;
 }
 
-.checked{
-    color:orange;
+.checked {
+    color: orange;
+}
+
+.bigicon {
+    color: white;
+}
+
+.mix {
+    min-height: 370px;
+}
+
+.resultado-busqueda {
+    padding: .2rem;
+}
+
+.dropdown-menu {
+    padding-left: .2rem;
+    padding-right: .2rem;
+}
+
+.dropdown{
+    margin-left: .5rem;
 }
